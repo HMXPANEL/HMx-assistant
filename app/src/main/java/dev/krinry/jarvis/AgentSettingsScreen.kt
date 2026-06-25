@@ -87,14 +87,13 @@ fun AgentSettingsScreen(onBack: () -> Unit) {
 
     val hazeState = remember { HazeState() }
 
-    Box(modifier = Modifier.fillMaxSize().background(DeepSpace)) {
+    Box(modifier = Modifier.fillMaxSize().background(DeepSpace).haze(hazeState)) {
 
         AnimatedBackgroundOrbs()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .haze(hazeState)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .systemBarsPadding()
