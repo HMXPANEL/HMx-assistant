@@ -87,7 +87,9 @@ fun AgentSettingsScreen(onBack: () -> Unit) {
 
     val hazeState = remember { HazeState() }
 
-    Box(modifier = Modifier.fillMaxSize().background(DeepSpace).haze(hazeState)) {
+    Box(modifier = Modifier.fillMaxSize().background(DeepSpace)) {
+
+        Box(modifier = Modifier.fillMaxSize().haze(hazeState))
 
         AnimatedBackgroundOrbs()
 
