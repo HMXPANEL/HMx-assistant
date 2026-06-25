@@ -249,8 +249,15 @@ class FloatingBubbleService : Service() {
         var initialX = 0; var initialY = 0
         var initialTouchX = 0f; var initialTouchY = 0f
         var isMoved = false
+        var longPressFired = false
         val longPressHandler = android.os.Handler(android.os.Looper.getMainLooper())
-        val longPressRunnable = Runnable { if (!isMoved) { vibrateShort(); showBubbleMenu() } }
+        val longPressRunnable = Runnable {
+            if (!isMoved) {
+                longPressFired = true
+                vibrateShort()
+                showBubbleMenu()
+            }
+        }
 
         bubble.setOnTouchListener { _, event ->
             when (event.action) {
@@ -258,27 +265,30 @@ class FloatingBubbleService : Service() {
                     initialX = bubbleParams.x; initialY = bubbleParams.y
                     initialTouchX = event.rawX; initialTouchY = event.rawY
                     isMoved = false
+                    longPressFired = false
                     longPressHandler.postDelayed(longPressRunnable, 600)
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (event.rawX - initialTouchX).toInt()
                     val dy = (event.rawY - initialTouchY).toInt()
-                    if (Math.abs(dx) > dpToPx(5) || Math.abs(dy) > dpToPx(5)) {
+                    if (Math.abs(dx) > dpToPx(10) || Math.abs(dy) > dpToPx(10)) {
                         if (!isMoved) {
                             isMoved = true
                             longPressHandler.removeCallbacks(longPressRunnable)
                         }
                     }
-                    bubbleParams.x = initialX + dx; bubbleParams.y = initialY + dy
-                    windowManager.updateViewLayout(bubble, bubbleParams); true
+                    if (isMoved) {
+                        bubbleParams.x = initialX + dx; bubbleParams.y = initialY + dy
+                        windowManager.updateViewLayout(bubble, bubbleParams)
+                    }
+                    true
                 }
                 MotionEvent.ACTION_UP -> {
                     longPressHandler.removeCallbacks(longPressRunnable)
-                    if (!isMoved) {
+                    if (!isMoved && !longPressFired) {
                         val now = System.currentTimeMillis()
                         if (now - lastTapTime < 350 && lastCommand != null) {
-                            // Double-tap: repeat last command
                             onDoubleTap()
                         } else {
                             onBubbleTapped()
