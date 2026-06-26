@@ -10,11 +10,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.UUID
 
 sealed interface ChatMessage {
-    val id: String get() = UUID.randomUUID().toString().take(8)
-    val timestamp: Long get() = System.currentTimeMillis()
+    val id: String get() = java.util.UUID.randomUUID().toString().take(8)
+    val timestamp: Long get() = java.lang.System.currentTimeMillis()
     data class User(val text: String) : ChatMessage
     data class Assistant(
         val text: String,
