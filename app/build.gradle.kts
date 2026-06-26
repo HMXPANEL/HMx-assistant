@@ -74,10 +74,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     
-    // Markdown rendering
-    implementation(libs.compose.markdown)
-    implementation(libs.compose.markdown.renderer)
-    
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     
