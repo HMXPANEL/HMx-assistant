@@ -10,16 +10,18 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.UUID
 
 sealed interface ChatMessage {
-    data class User(val text: String, val timestamp: Long = System.currentTimeMillis()) : ChatMessage
+    val id: String get() = UUID.randomUUID().toString().take(8)
+    val timestamp: Long get() = System.currentTimeMillis()
+    data class User(val text: String) : ChatMessage
     data class Assistant(
         val text: String,
         val isStreaming: Boolean = false,
-        val timestamp: Long = System.currentTimeMillis(),
         val isError: Boolean = false
     ) : ChatMessage
-    data class System(val text: String, val timestamp: Long = System.currentTimeMillis()) : ChatMessage
+    data class System(val text: String) : ChatMessage
 }
 
 class ChatViewModel(private val context: Context) : ViewModel() {
@@ -37,7 +39,6 @@ class ChatViewModel(private val context: Context) : ViewModel() {
     val suggestions = _suggestions.asStateFlow()
 
     private val agentEngine = AgentLlmEngine(context)
-    private var currentResponseChannel: Channel<String>? = null
 
     init {
         addMessage(ChatMessage.System("Tap the microphone or type to start. Say \"Hey Max\" for hands-free."))
@@ -180,7 +181,7 @@ class ChatViewModel(private val context: Context) : ViewModel() {
     fun copyMessage(text: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
         val clip = android.content.ClipData.newPlainText("Jarvis Response", text)
-        clipboard.primaryClip = clip
+        clipboard.setPrimaryClip(clip)
     }
 
     override fun onCleared() {

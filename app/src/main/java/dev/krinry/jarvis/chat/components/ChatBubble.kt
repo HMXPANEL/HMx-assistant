@@ -25,7 +25,7 @@ import dev.krinry.jarvis.ui.theme.*
 fun ChatBubble(
     message: ChatMessage,
     onCopy: (String) -> Unit,
-    onRegenerate: () -> Unit,
+    onRegenerate: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -70,7 +70,7 @@ private fun UserBubble(text: String, modifier: Modifier = Modifier) {
 private fun AssistantBubble(
     message: ChatMessage.Assistant,
     onCopy: (String) -> Unit,
-    onRegenerate: () -> Unit,
+    onRegenerate: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -117,8 +117,8 @@ private fun AssistantBubble(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 BubbleActionButton(onClick = { onCopy(message.text) }, icon = "\uD83D\uDCCB")
-                if (onRegenerate != { }) {
-                    BubbleActionButton(onClick = onRegenerate, icon = "\uD83D\uDD04")
+                if (onRegenerate != null) {
+                    BubbleActionButton(onClick = { onRegenerate() }, icon = "\uD83D\uDD04")
                 }
             }
         }

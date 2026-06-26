@@ -109,13 +109,15 @@ fun ChatScreen(
                     ) {
                         items(
                             items = messages,
-                            key = { "${it::class.simpleName}_${it.timestamp}" }
+                            key = { it.id }
                         ) { message ->
+                            val onRegenerate: (() -> Unit)? = if (message is ChatMessage.Assistant && !message.isStreaming) {
+                                { chatViewModel.regenerateLastResponse() }
+                            } else null
                             ChatBubble(
                                 message = message,
                                 onCopy = { chatViewModel.copyMessage(it) },
-                                onRegenerate = if (message is ChatMessage.Assistant && !message.isStreaming)
-                                    { chatViewModel.regenerateLastResponse() } else { {} }
+                                onRegenerate = onRegenerate
                             )
                         }
                         item {
