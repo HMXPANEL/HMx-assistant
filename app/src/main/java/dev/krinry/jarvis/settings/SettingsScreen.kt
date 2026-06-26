@@ -1,4 +1,4 @@
-package dev.krinry.jarvis
+package dev.krinry.jarvis.settings
 
 import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgentSettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var refreshKey by remember { mutableIntStateOf(0) }
@@ -87,7 +87,21 @@ fun AgentSettingsScreen(onBack: () -> Unit) {
 
     val hazeState = remember { HazeState() }
 
-    Box(modifier = Modifier.fillMaxSize().background(DeepSpace)) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Settings", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, "Back", tint = TextPrimary)
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+            )
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+    Box(modifier = Modifier.fillMaxSize().background(DeepSpace).padding(innerPadding)) {
 
         Box(modifier = Modifier.fillMaxSize().haze(hazeState))
 
@@ -98,9 +112,7 @@ fun AgentSettingsScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .systemBarsPadding()
         ) {
-            Spacer(Modifier.height(16.dp))
 
             // ── HERO CARD ──────────────────────────────────────────────────────
             GlassCard(
@@ -437,6 +449,7 @@ fun AgentSettingsScreen(onBack: () -> Unit) {
             )
             Spacer(Modifier.height(32.dp))
         }
+    }
     }
 
     if (showModelPicker) {
