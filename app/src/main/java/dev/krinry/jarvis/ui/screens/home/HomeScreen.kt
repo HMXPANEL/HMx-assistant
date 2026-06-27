@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -279,14 +280,18 @@ fun RecentCommandsSection(context: android.content.Context) {
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         } else {
-            items.forEachIndexed { index, (command, time) ->
+            for (i in items.indices) {
+                val command = items[i].first
+                val time = items[i].second
                 RecentCommandItem(
                     icon = Icons.Default.Terminal,
                     text = command,
                     time = time,
                     iconTint = NeonGreen
                 )
-                if (index < items.size - 1) Spacer(modifier = Modifier.height(12.dp))
+                if (i < items.size - 1) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
         }
     }
