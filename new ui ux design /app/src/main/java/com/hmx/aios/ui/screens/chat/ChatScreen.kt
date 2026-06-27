@@ -1,4 +1,4 @@
-package dev.krinry.jarvis.ui.screens.chat
+package com.hmx.aios.ui.screens.chat
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -22,8 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.krinry.jarvis.ai.chat
-import dev.krinry.jarvis.ui.theme.*
+import com.hmx.aios.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -82,63 +82,26 @@ fun ChatScreen() {
                         RichWeatherMessage(message.time)
                     }
                     MessageType.LOADING -> {
-                        dev.krinry.jarvis.ui.components.TerminalLoadingIndicator()
+                        com.hmx.aios.ui.components.TerminalLoadingIndicator()
                     }
                 }
             }
         }
         
-        dev.krinry.jarvis.ui.components.TerminalInput(
+        com.hmx.aios.ui.components.TerminalInput(
             onSendMessage = { text ->
-                val time = getCurrentTime()
+                val time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
                 messages = messages + ChatMessage(text, time, true)
                 messages = messages + ChatMessage("", time, false, MessageType.LOADING)
                 
                 coroutineScope.launch {
-                    val apiKey = dev.krinry.jarvis.security.SecureKeyStore.getProviderApiKey(context, "gemini")
-                        ?: dev.krinry.jarvis.security.SecureKeyStore.getProviderApiKey(context, "groq")
-                    
-                    if (apiKey.isNullOrEmpty()) {
-                        messages = messages.filter { it.type != MessageType.LOADING }
-                        messages = messages + ChatMessage(
-                            "⚠️ No API key found. Please go to Setup and add your Gemini or Groq API key.",
-                            getCurrentTime(), false, MessageType.TEXT
-                        )
-                        return@launch
-                    }
-
-                    try {
-                        val provider = dev.krinry.jarvis.security.SecureKeyStore.getSelectedProvider(context) ?: "gemini"
-                        val model = dev.krinry.jarvis.security.SecureKeyStore.getSelectedModel(context) ?: "gemini-2.0-flash"
-                        
-                        val response = chat(
-                            context = context,
-                            provider = provider,
-                            model = model,
-                            userMessage = text,
-                            isChatMode = isChatMode
-                        )
-                        
-                        messages = messages.filter { it.type != MessageType.LOADING }
-                        messages = messages + ChatMessage(
-                            response ?: "Sorry, I could not get a response. Please try again.",
-                            getCurrentTime(), false, MessageType.TEXT
-                        )
-                    } catch (e: Exception) {
-                        messages = messages.filter { it.type != MessageType.LOADING }
-                        messages = messages + ChatMessage(
-                            "❌ Error: ${e.message}",
-                            getCurrentTime(), false, MessageType.TEXT
-                        )
-                    }
+                    delay(1500)
+                    messages = messages.filter { it.type != MessageType.LOADING }
+                    messages = messages + ChatMessage("Command executed: $text", time, false, MessageType.TEXT)
                 }
             }
         )
     }
-}
-
-fun getCurrentTime(): String {
-    return SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
 }
 
 @Composable
@@ -159,7 +122,7 @@ fun ChatHeader() {
                     .border(1.dp, SurfaceVariantDark, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                dev.krinry.jarvis.ui.components.Glowing3DIcon(Icons.Default.SmartToy, contentDescription = "AI Avatar", tint = NeonGreen, modifier = Modifier.size(24.dp))
+                com.hmx.aios.ui.components.Glowing3DIcon(Icons.Default.SmartToy, contentDescription = "AI Avatar", tint = NeonGreen, modifier = Modifier.size(24.dp))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
@@ -221,7 +184,7 @@ fun ModeToggle(isChatMode: Boolean, onModeChanged: (Boolean) -> Unit) {
 @Composable
 fun AssistantMessage(text: String, time: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-        dev.krinry.jarvis.ui.components.Glowing3DIcon(Icons.Default.SmartToy, contentDescription = "AI", tint = NeonGreen, modifier = Modifier.size(24.dp))
+        com.hmx.aios.ui.components.Glowing3DIcon(Icons.Default.SmartToy, contentDescription = "AI", tint = NeonGreen, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Column {
             Text("MAX", color = NeonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -253,7 +216,7 @@ fun UserMessage(text: String, time: String) {
 @Composable
 fun RichWeatherMessage(time: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-        dev.krinry.jarvis.ui.components.Glowing3DIcon(Icons.Default.SmartToy, contentDescription = "AI", tint = NeonGreen, modifier = Modifier.size(24.dp))
+        com.hmx.aios.ui.components.Glowing3DIcon(Icons.Default.SmartToy, contentDescription = "AI", tint = NeonGreen, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text("MAX", color = NeonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -315,3 +278,4 @@ fun ChipAction(text: String) {
         }
     }
 }
+

@@ -84,6 +84,7 @@ class GeminiProvider : LlmProvider {
             null
         }
     }
+    }
 
     override suspend fun fetchModels(apiKey: String): List<ModelInfo> {
         return try {

@@ -1,4 +1,4 @@
-package dev.krinry.jarvis.ui.screens.setup
+package com.hmx.aios.ui.screens.setup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,33 +10,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.krinry.jarvis.ui.theme.*
+import com.hmx.aios.ui.theme.*
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun SetupScreen() {
     val context = LocalContext.current
-    var selectedProvider by remember { 
-        mutableStateOf(
-            dev.krinry.jarvis.security.SecureKeyStore.getSelectedProvider(context) ?: "gemini"
-        ) 
-    }
-    var apiKeyInput by remember { mutableStateOf(
-        dev.krinry.jarvis.security.SecureKeyStore.getProviderApiKey(context, selectedProvider) ?: ""
-    ) }
-    var expanded by remember { mutableStateOf(false) }
-    val providers = listOf("gemini", "groq", "openrouter")
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -74,67 +62,6 @@ fun SetupScreen() {
                 }
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                Box {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(SurfaceVariantDark, RoundedCornerShape(12.dp))
-                            .clickable { expanded = true }
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(selectedProvider.uppercase(), color = TextPrimary, fontSize = 14.sp)
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = NeonGreen)
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.background(SurfaceDark)
-                    ) {
-                        providers.forEach { provider ->
-                            DropdownMenuItem(
-                                text = { Text(provider.uppercase(), color = TextPrimary) },
-                                onClick = {
-                                    selectedProvider = provider
-                                    apiKeyInput = dev.krinry.jarvis.security.SecureKeyStore
-                                        .getProviderApiKey(context, provider) ?: ""
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "API KEY",
-                    color = TextSecondary,
-                    fontSize = 11.sp,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedTextField(
-                    value = apiKeyInput,
-                    onValueChange = { apiKeyInput = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Enter your API key...", color = TextSecondary) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = NeonGreen,
-                        unfocusedBorderColor = SurfaceVariantDark,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary,
-                        cursorColor = NeonGreen
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
                 SettingItem(Icons.Outlined.Psychology, "AI Model", "Gemini Pro 1.5")
                 SettingItem(Icons.Outlined.RecordVoiceOver, "Voice Model", "Neural 2.0")
                 SettingItem(Icons.Outlined.Mic, "Wake Word", "Hey Max")
@@ -146,17 +73,7 @@ fun SetupScreen() {
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 Button(
-                    onClick = {
-                        if (apiKeyInput.isNotBlank()) {
-                            dev.krinry.jarvis.security.SecureKeyStore.saveProviderApiKey(
-                                context, selectedProvider, apiKeyInput.trim()
-                            )
-                            dev.krinry.jarvis.security.SecureKeyStore.setSelectedProvider(context, selectedProvider)
-                            Toast.makeText(context, "✅ API Key saved successfully", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "⚠️ Please enter an API key", Toast.LENGTH_SHORT).show()
-                        }
-                    },
+                    onClick = { Toast.makeText(context, "Changes Saved", Toast.LENGTH_SHORT).show() },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = DarkBackground),
                     shape = RoundedCornerShape(12.dp)

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Sample data extraction rules.
+-->
+<data-extraction-rules>
+    <cloud-network>
+        <exclude domain="sharedpref" path="."/>
+    </cloud-network>
+</data-extraction-rules>

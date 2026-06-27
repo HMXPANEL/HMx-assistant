@@ -1,8 +1,7 @@
-package dev.krinry.jarvis.ui.screens.home
+package com.hmx.aios.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -19,13 +18,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.krinry.jarvis.ui.theme.*
+import com.hmx.aios.ui.theme.*
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.clickable
 
 @Composable
 fun HomeScreen() {
-    val context = LocalContext.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -38,7 +37,7 @@ fun HomeScreen() {
         item { SystemHealthSection() }
         item { ActiveModulesSection() }
         item { QuickCommandsSection() }
-        item { RecentCommandsSection(context) }
+        item { RecentCommandsSection() }
     }
 }
 
@@ -82,7 +81,7 @@ fun HeaderSection() {
         }
         
         // AI Core Orb Animation
-        dev.krinry.jarvis.ui.components.AICoreOrb(modifier = Modifier.size(72.dp))
+        com.hmx.aios.ui.components.AICoreOrb(modifier = Modifier.size(72.dp))
     }
 }
 
@@ -180,7 +179,7 @@ fun ModuleItem(label: String, icon: ImageVector?, isAdd: Boolean = false) {
             contentAlignment = Alignment.Center
         ) {
             if (icon != null) {
-                dev.krinry.jarvis.ui.components.Glowing3DIcon(icon, contentDescription = label, tint = NeonGreen, modifier = Modifier.size(20.dp))
+                com.hmx.aios.ui.components.Glowing3DIcon(icon, contentDescription = label, tint = NeonGreen, modifier = Modifier.size(20.dp))
             } else {
                 Text(text = label, color = NeonGreen, fontWeight = FontWeight.Bold)
             }
@@ -196,7 +195,7 @@ fun ModuleItem(label: String, icon: ImageVector?, isAdd: Boolean = false) {
 fun QuickCommandsSection() {
     Column {
         Text(
-            text = "QUICK COMMAND",
+            text = "QUICK COMMANDS",
             color = TextSecondary,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
@@ -226,7 +225,7 @@ fun CommandItem(label: String, icon: ImageVector) {
                 .border(1.dp, SurfaceVariantDark, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            dev.krinry.jarvis.ui.components.Glowing3DIcon(icon, contentDescription = label, tint = NeonGreen, modifier = Modifier.size(24.dp))
+            com.hmx.aios.ui.components.Glowing3DIcon(icon, contentDescription = label, tint = NeonGreen, modifier = Modifier.size(24.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = label, color = TextSecondary, fontSize = 10.sp, maxLines = 1)
@@ -234,26 +233,7 @@ fun CommandItem(label: String, icon: ImageVector) {
 }
 
 @Composable
-fun RecentCommandsSection(context: android.content.Context) {
-    val prefs = context.getSharedPreferences("hmx_history", android.content.Context.MODE_PRIVATE)
-    val historyJson = prefs.getString("recent_commands", null)
-    
-    val items = remember(historyJson) {
-        if (historyJson.isNullOrEmpty()) emptyList()
-        else {
-            try {
-                val arr = org.json.JSONArray(historyJson)
-                val count = minOf(arr.length(), 3)
-                (0 until count).map { i ->
-                    val obj = arr.getJSONObject(i)
-                    Pair(obj.getString("command"), obj.getString("time"))
-                }
-            } catch (e: Exception) {
-                emptyList()
-            }
-        }
-    }
-    
+fun RecentCommandsSection() {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -271,24 +251,11 @@ fun RecentCommandsSection(context: android.content.Context) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         
-        if (items.isEmpty()) {
-            Text(
-                text = "No commands yet. Say 'Hey Max' or use Chat to get started.",
-                color = TextSecondary,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        } else {
-            items.forEachIndexed { index, (command, time) ->
-                RecentCommandItem(
-                    icon = Icons.Default.Terminal,
-                    text = command,
-                    time = time,
-                    iconTint = NeonGreen
-                )
-                if (index < items.size - 1) Spacer(modifier = Modifier.height(12.dp))
-            }
-        }
+        RecentCommandItem(Icons.Default.Message, "Open WhatsApp and send hi to Rahul", "08:21 AM", Color(0xFF25D366))
+        Spacer(modifier = Modifier.height(12.dp))
+        RecentCommandItem(Icons.Default.WbSunny, "What's the weather in Mumbai?", "08:15 AM", Color(0xFFFDB813))
+        Spacer(modifier = Modifier.height(12.dp))
+        RecentCommandItem(Icons.Default.Notifications, "Remind me to study at 8 PM", "07:45 AM", Color(0xFF9C27B0))
     }
 }
 
@@ -309,7 +276,7 @@ fun RecentCommandItem(icon: ImageVector, text: String, time: String, iconTint: C
                 .background(iconTint.copy(alpha = 0.15f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            dev.krinry.jarvis.ui.components.Glowing3DIcon(icon, contentDescription = text, tint = iconTint, modifier = Modifier.size(20.dp))
+            com.hmx.aios.ui.components.Glowing3DIcon(icon, contentDescription = text, tint = iconTint, modifier = Modifier.size(20.dp))
         }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
