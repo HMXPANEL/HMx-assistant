@@ -51,3 +51,31 @@ data class ModelInfo(
     val isFree: Boolean = false,
     val contextLength: Int = 0
 )
+
+suspend fun chat(
+    context: android.content.Context,
+    provider: String,
+    model: String,
+    userMessage: String,
+    isChatMode: Boolean
+): String? {
+    val systemPrompt = if (isChatMode) {
+        """You are Max, a helpful AI assistant. 
+Respond naturally and conversationally.
+If user writes in Hindi, respond in Hindi.
+If user writes in English, respond in English.
+Keep responses concise and helpful."""
+    } else {
+        """You are Max, an AI agent that controls Android devices.
+The user wants you to perform actions on their phone.
+Describe what action you would take clearly and concisely.
+If user writes in Hindi, respond in Hindi."""
+    }
+
+    return when (provider.lowercase()) {
+        "gemini" -> GeminiProvider.chatMessage(context, model, systemPrompt, userMessage)
+        "groq" -> GroqApiClient.chatMessage(context, model, systemPrompt, userMessage)
+        "openrouter" -> OpenRouterProvider.chatMessage(context, model, systemPrompt, userMessage)
+        else -> GeminiProvider.chatMessage(context, model, systemPrompt, userMessage)
+    }
+}

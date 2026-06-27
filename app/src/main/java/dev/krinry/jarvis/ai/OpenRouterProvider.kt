@@ -1,8 +1,14 @@
 package dev.krinry.jarvis.ai
 
+import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +32,63 @@ class OpenRouterProvider : LlmProvider {
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
+
+    companion object {
+        suspend fun chatMessage(
+            context: Context,
+            model: String,
+            systemPrompt: String,
+            userMessage: String
+        ): String? {
+            val apiKey = dev.krinry.jarvis.security.SecureKeyStore.getProviderApiKey(context, "openrouter")
+                ?: return null
+            
+            val requestBody = JSONObject().apply {
+                put("model", model)
+                put("messages", JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("role", "system")
+                        put("content", systemPrompt)
+                    })
+                    put(JSONObject().apply {
+                        put("role", "user")
+                        put("content", userMessage)
+                    })
+                })
+                put("max_tokens", 1024)
+                put("temperature", 0.7)
+            }.toString()
+            
+            return try {
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .build()
+                
+                val request = Request.Builder()
+                    .url("https://openrouter.ai/api/v1/chat/completions")
+                    .addHeader("Authorization", "Bearer $apiKey")
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("HTTP-Referer", "https://jarvis.krinry.dev")
+                    .addHeader("X-Title", "Jarvis AI Agent")
+                    .post(requestBody.toRequestBody("application/json".toMediaType()))
+                    .build()
+                
+                val response = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute()
+                }
+                
+                val responseBody = response.body?.string() ?: return null
+                val json = JSONObject(responseBody)
+                json.getJSONArray("choices")
+                    .getJSONObject(0)
+                    .getJSONObject("message")
+                    .getString("content")
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
 
     override suspend fun fetchModels(apiKey: String): List<ModelInfo> {
         return try {

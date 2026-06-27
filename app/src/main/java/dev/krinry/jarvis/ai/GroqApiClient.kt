@@ -156,6 +156,63 @@ object GroqApiClient {
     }
 
     // =========================================================================
+    // === Simple Chat Message (for ChatScreen) ===
+    // =========================================================================
+
+    suspend fun chatMessage(
+        context: Context,
+        model: String,
+        systemPrompt: String,
+        userMessage: String
+    ): String? {
+        val apiKey = dev.krinry.jarvis.security.SecureKeyStore.getProviderApiKey(context, "groq")
+            ?: return null
+        
+        val requestBody = JSONObject().apply {
+            put("model", model)
+            put("messages", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("role", "system")
+                    put("content", systemPrompt)
+                })
+                put(JSONObject().apply {
+                    put("role", "user")
+                    put("content", userMessage)
+                })
+            })
+            put("max_tokens", 1024)
+            put("temperature", 0.7)
+        }.toString()
+        
+        return try {
+            val client = OkHttpClient.Builder()
+                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .build()
+            
+            val request = Request.Builder()
+                .url("https://api.groq.com/openai/v1/chat/completions")
+                .addHeader("Authorization", "Bearer $apiKey")
+                .addHeader("Content-Type", "application/json")
+                .post(requestBody.toRequestBody("application/json".toMediaType()))
+                .build()
+            
+            val response = withContext(Dispatchers.IO) {
+                client.newCall(request).execute()
+            }
+            
+            val responseBody = response.body?.string() ?: return null
+            val json = JSONObject(responseBody)
+            json.getJSONArray("choices")
+                .getJSONObject(0)
+                .getJSONObject("message")
+                .getString("content")
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // =========================================================================
     // === LLM Chat ===
     // =========================================================================
 

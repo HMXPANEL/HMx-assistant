@@ -184,4 +184,24 @@ object SecureKeyStore {
     fun isAgentEnabled(context: Context): Boolean {
         return getEncryptedPrefs(context).getBoolean(KEY_AGENT_ENABLED, false)
     }
+
+    // =========================================================================
+    // === Selected Provider & Model (for UI screens) ===
+    // =========================================================================
+
+    fun getSelectedProvider(context: Context): String? {
+        return getEncryptedPrefs(context).getString("selected_provider", "gemini")
+    }
+
+    fun setSelectedProvider(context: Context, provider: String) {
+        getEncryptedPrefs(context).edit().putString("selected_provider", provider).apply()
+    }
+
+    fun getSelectedModel(context: Context): String? {
+        return getEncryptedPrefs(context).getString("selected_model", "gemini-2.0-flash")
+    }
+
+    fun setSelectedModel(context: Context, model: String) {
+        getEncryptedPrefs(context).edit().putString("selected_model", model).apply()
+    }
 }
